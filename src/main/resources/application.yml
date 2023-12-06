@@ -1,0 +1,27 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  cloud:
+    function:
+      definition: process
+    stream:
+      kafka:
+        streams:
+          binder:
+            brokers: localhost:9092
+            configuration:
+              default:
+                key-serializer: org.apache.kafka.common.serialization.StringSerializer
+                value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+                key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+                value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+            application-id: hello-word-count-sample
+        bindings:
+          process-in-0: orders
+          process-out-0: order-validations
+#          fraudProcess-in-0: orders
+#          fraudProcess-out-0: order-validations
