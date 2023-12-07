@@ -12,20 +12,22 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
+import org.springframework.stereotype.Controller
+import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.RestController
 import java.util.function.Function
 
-//@Configuration
-//@Component
+@Service
 class OrderDetailsStream {
 
-    //@Bean
-    fun process(): Function<KStream<String, Order>, KStream<String, OrderValidation>> =
-         Function {
-            it.filter { _, value -> value.state == OrderState.CREATED}
+    @Bean
+    fun process(): Function<KStream<String, Order>, KStream<String, OrderValidation>> {
+        return Function {
+            it.peek {key, value -> print("process 값이 잘 나오는가? : $key $value") }
+                .filter { _, value -> value.state == OrderState.CREATED}
                 .map{ key, value -> KeyValue(key, OrderValidation(value.id, ORDER_DETAILS_CHECK, if(isValid(value)) PASS else FAIL)) }
-         }
-
-
+        }
+    }
 
     private fun isValid(order: Order): Boolean {
         if (order.quantity < 0)

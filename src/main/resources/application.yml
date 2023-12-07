@@ -7,11 +7,22 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   cloud:
     function:
-      definition: process
+      definition: process;fraud
     stream:
+      bindings:
+        process-in-0.destination: orders
+        process-out-0.destination: order-validations
+
+        fraud-in-0.destination: orders
+        fraud-out-0.destination: order-validations
+
       kafka:
         streams:
+          bindings:
+            process-in-0.consumer.configuration.application.id: processProcessor
+            fraud-in-0.consumer.configuration.application.id: fraudProcessor
           binder:
+            application-id: hello-word-count-sample
             brokers: localhost:9092
             configuration:
               default:
@@ -19,9 +30,10 @@ spring:
                 value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
                 key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
                 value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-            application-id: hello-word-count-sample
-        bindings:
-          process-in-0: orders
-          process-out-0: order-validations
-#          fraudProcess-in-0: orders
-#          fraudProcess-out-0: order-validations
+
+#      kafka:
+#        streams:
+#          binder:
+#            configuration:
+#              default.key.serde : org.apache.kafka.common.serialization.StringSerializer
+#              default.value.serde : org.springframework.kafka.support.serializer.JsonSerializer
