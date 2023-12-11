@@ -5,9 +5,17 @@ spring:
       acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      properties:
+#        spring.json.add.type.headers: false
+    consumer:
+      properties:
+        spring.json.trusted.packages: "*"
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
   cloud:
     function:
-      definition: process;fraud
+      definition: process;fraud;inventory
     stream:
       bindings:
         process-in-0.destination: orders
@@ -16,24 +24,33 @@ spring:
         fraud-in-0.destination: orders
         fraud-out-0.destination: order-validations
 
+        inventory-in-0.destination: orders
+        inventory-in-1.destination: warehouse-inventory
+        inventory-in-2.materializedAs: reservedStock
+        inventory-out-0.destination: order-validations
+
       kafka:
         streams:
-          bindings:
-            process-in-0.consumer.configuration.application.id: processProcessor
-            fraud-in-0.consumer.configuration.application.id: fraudProcessor
           binder:
+#            headerMapperBeanName: kafkaHeaderMapper
             application-id: hello-word-count-sample
             brokers: localhost:9092
             configuration:
-              default:
+#                spring.json.trusted.packages: "*"
                 key-serializer: org.apache.kafka.common.serialization.StringSerializer
                 value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
                 key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
                 value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+            functions:
+              process.applicationId: processProcessor
+              fraud.applicationId: fraudProcessor
+              inventory.applicationId: InventoryProcessor
 
-#      kafka:
-#        streams:
-#          binder:
-#            configuration:
-#              default.key.serde : org.apache.kafka.common.serialization.StringSerializer
-#              default.value.serde : org.springframework.kafka.support.serializer.JsonSerializer
+#        binder:
+#          headerMapperBeanName: kafkaHeaderMapper
+#          consumer-properties:
+#            spring.json.trusted.packages: "*"
+
+logging:
+  level:
+    root: ERROR

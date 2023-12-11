@@ -15,7 +15,7 @@ class OrdersController(private val kafkaTemplate: KafkaTemplate<String, Any>) {
     @PostMapping(value = ["/orders"])
     fun submitOrder(order: OrderBean): String {
         val bean = OrderBean.formBean(order)
-        kafkaTemplate.send(Topics.ORDERS, bean).get()
+        kafkaTemplate.send(Topics.ORDERS, bean.id, bean).get()
         return bean.id
     }
 }
