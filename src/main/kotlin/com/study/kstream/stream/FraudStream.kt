@@ -1,5 +1,6 @@
 package com.study.kstream.stream
 
+import com.study.kstream.config.FixJsonSerde
 import com.study.kstream.model.*
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.kstream.*
@@ -21,12 +22,12 @@ class FraudStream {
         Function {
             val orders = it.filter { _, order -> OrderState.CREATED == order.state }
 
-            val aggregate = orders.groupBy({ _, order -> order.customerId }, Grouped.with(Serdes.Long(), JsonSerde<Order>()))
+            val aggregate = orders.groupBy({ _, order -> order.customerId }, Grouped.with(Serdes.Long(), JsonSerde(Order::class.java)))
                 .windowedBy(SessionWindows.with(Duration.ofHours(1)))
                 .aggregate(OrderValue::empty,
                     {_, order, total ->  OrderValue(order, total.value + order.quantity * order.price) },
                     {_, a, b -> simpleMerge(a, b)},
-                    Materialized.with(Serdes.Long(), JsonSerde<OrderValue>())
+                    Materialized.with(Serdes.Long(), JsonSerde(OrderValue::class.java))
                 )
 
             val ordersWithTotals = aggregate.toStream {windowedKey, _ -> windowedKey.key()}

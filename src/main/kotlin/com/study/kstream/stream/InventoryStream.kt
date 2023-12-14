@@ -1,5 +1,6 @@
 package com.study.kstream.stream
 
+import com.study.kstream.config.FixJsonSerde
 import com.study.kstream.model.*
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KeyValue
@@ -29,7 +30,7 @@ class InventoryStream {
                 .join(
                     warehouseInventory,
                     ::KeyValue,
-                    Joined.with(ProductTypeSerde(), JsonSerde<Order>(), Serdes.Integer())
+                    Joined.with(ProductTypeSerde(), JsonSerde(Order::class.java), Serdes.Integer())
                 )
                 .transform(::InventoryValidator, RESERVED_STOCK_STORE_NAME)
         }

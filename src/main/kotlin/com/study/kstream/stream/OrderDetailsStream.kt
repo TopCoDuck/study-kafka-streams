@@ -23,8 +23,7 @@ class OrderDetailsStream {
     @Bean
     fun process(): Function<KStream<String, Order>, KStream<String, OrderValidation>> {
         return Function {
-            it.peek {key, value -> print("process 값이 잘 나오는가? : $key $value") }
-                .filter { _, value -> value.state == OrderState.CREATED}
+            it.filter { _, value -> value.state == OrderState.CREATED}
                 .map{ key, value -> KeyValue(key, OrderValidation(value.id, ORDER_DETAILS_CHECK, if(isValid(value)) PASS else FAIL)) }
         }
     }

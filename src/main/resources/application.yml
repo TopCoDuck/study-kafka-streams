@@ -1,23 +1,31 @@
 spring:
+#  json:
+#    trusted:
+#      packages: "com.study.kstream"
   kafka:
     bootstrap-servers: localhost:9092
     producer:
       acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-#      properties:
-#        spring.json.add.type.headers: false
     consumer:
-      properties:
-        spring.json.trusted.packages: "*"
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+#    streams:
+#      properties:
+#        spring.json.trusted.packages: "*"
+  #        spring.json.type.mapping: com.study.kstream.model.Order
+
 
   cloud:
     function:
       definition: process;fraud;inventory
     stream:
+
       bindings:
+
         process-in-0.destination: orders
         process-out-0.destination: order-validations
 
@@ -28,28 +36,66 @@ spring:
         inventory-in-1.destination: warehouse-inventory
         inventory-in-2.materializedAs: reservedStock
         inventory-out-0.destination: order-validations
-
       kafka:
         streams:
+#          default:
+#            consumer:
+#              configuration:
+#                spring.json.trusted.packages: '*'
           binder:
+#            configuration:
+#              spring:
+#                json:
+#                  trusted:
+#                    packages: '*'
+
+
+#            configuration:
+#              default:
+#                key:
+#                  serde: com.study.kstream.config.FixJsonSerde
+#                value:
+#                  serde: com.study.kstream.config.FixJsonSerde
+#              spring.json.trusted.packages: '*'
+            #            consumerProperties:
+#              spring.json.trusted.packages: "*"
 #            headerMapperBeanName: kafkaHeaderMapper
             application-id: hello-word-count-sample
             brokers: localhost:9092
-            configuration:
+#            configuration:
+#              consumerProperties:
 #                spring.json.trusted.packages: "*"
-                key-serializer: org.apache.kafka.common.serialization.StringSerializer
-                value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-                key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-                value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#              key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#              value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#              key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#              value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#            consumerProperties:
+#             spring.json.trusted.packages: "*"
             functions:
               process.applicationId: processProcessor
               fraud.applicationId: fraudProcessor
               inventory.applicationId: InventoryProcessor
 
+
+#            configuration:
+#              default:
+#                value:
+#                  serde:
+#            producer-properties:
+#              keySerde: org.apache.kafka.common.serialization.StringSerializer
+#              valueSerde: org.springframework.kafka.support.serializer.JsonSerializer
+#            consumer-properties:
+#              keySerde: org.apache.kafka.common.serialization.StringDeserializer
+#              valueSerde: com.study.kstream.config.FixJsonDeserializer
+
+
 #        binder:
 #          headerMapperBeanName: kafkaHeaderMapper
 #          consumer-properties:
 #            spring.json.trusted.packages: "*"
+
+
+
 
 logging:
   level:
