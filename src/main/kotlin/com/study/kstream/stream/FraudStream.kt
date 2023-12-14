@@ -4,9 +4,7 @@ import com.study.kstream.model.*
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.kstream.*
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.support.serializer.JsonSerde
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.util.function.Function
@@ -21,12 +19,12 @@ class FraudStream {
         Function {
             val orders = it.filter { _, order -> OrderState.CREATED == order.state }
 
-            val aggregate = orders.groupBy({ _, order -> order.customerId }, Grouped.with(Serdes.Long(), JsonSerde<Order>()))
+            val aggregate = orders.groupBy({ _, order -> order.customerId }, Grouped.with(Serdes.Long(), JsonSerde(Order::class.java)))
                 .windowedBy(SessionWindows.with(Duration.ofHours(1)))
                 .aggregate(OrderValue::empty,
                     {_, order, total ->  OrderValue(order, total.value + order.quantity * order.price) },
                     {_, a, b -> simpleMerge(a, b)},
-                    Materialized.with(Serdes.Long(), JsonSerde<OrderValue>())
+                    Materialized.with(Serdes.Long(), JsonSerde(OrderValue::class.java))
                 )
 
             val ordersWithTotals = aggregate.toStream {windowedKey, _ -> windowedKey.key()}

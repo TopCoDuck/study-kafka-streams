@@ -5,8 +5,6 @@ spring:
       acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-#      properties:
-#        spring.json.add.type.headers: false
     consumer:
       properties:
         spring.json.trusted.packages: "*"
@@ -32,24 +30,12 @@ spring:
       kafka:
         streams:
           binder:
-#            headerMapperBeanName: kafkaHeaderMapper
             application-id: hello-word-count-sample
             brokers: localhost:9092
-            configuration:
-#                spring.json.trusted.packages: "*"
-                key-serializer: org.apache.kafka.common.serialization.StringSerializer
-                value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-                key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-                value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
             functions:
               process.applicationId: processProcessor
               fraud.applicationId: fraudProcessor
               inventory.applicationId: InventoryProcessor
-
-#        binder:
-#          headerMapperBeanName: kafkaHeaderMapper
-#          consumer-properties:
-#            spring.json.trusted.packages: "*"
 
 logging:
   level:
