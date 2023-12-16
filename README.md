@@ -1,2 +1,2 @@
 # study-kafka-streams
-kafka streams 학습 중
+주문 로직을 kafka streams 구현(진행 중)
