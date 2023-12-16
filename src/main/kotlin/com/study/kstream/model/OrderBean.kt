@@ -2,8 +2,8 @@ package com.study.kstream.model
 
 data class OrderBean (
     val id: String,
-    val customerId: Long?,
-    val state: OrderState?,
+    val customerId: Long,
+    val state: OrderState,
     val product: Product,
     val quantity: Int,
     val price: Double,

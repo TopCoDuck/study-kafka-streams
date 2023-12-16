@@ -12,10 +12,10 @@ import java.util.concurrent.CompletableFuture
 @RestController
 class OrdersController(private val kafkaTemplate: KafkaTemplate<String, Any>) {
 
-    @PostMapping(value = ["/orders"])
+    @PostMapping("/orders")
     fun submitOrder(order: OrderBean): String {
         val bean = OrderBean.formBean(order)
-        kafkaTemplate.send(Topics.ORDERS, bean.id, bean).get()
+        kafkaTemplate.send(Topics.ORDERS.name, bean.id, bean).get()
         return bean.id
     }
 }

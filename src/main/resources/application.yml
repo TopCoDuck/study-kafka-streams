@@ -5,6 +5,7 @@ spring:
       acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
     consumer:
       properties:
         spring.json.trusted.packages: "*"
@@ -13,7 +14,7 @@ spring:
 
   cloud:
     function:
-      definition: process;fraud;inventory
+      definition: process;fraud;inventory;validationsAggregator;email;
     stream:
       bindings:
         process-in-0.destination: orders
@@ -24,11 +25,25 @@ spring:
 
         inventory-in-0.destination: orders
         inventory-in-1.destination: warehouse-inventory
-        inventory-in-2.materializedAs: reservedStock
         inventory-out-0.destination: order-validations
+
+        validationsAggregator-in-0.destination: order-validations
+        validationsAggregator-in-1.destination: orders
+        validationsAggregator-out-0.destination: orders
+
+        email-in-0.destination: orders
+        email-in-1.destination: payments
+        email-in-2.destination: customers
+        email-out-0.destination: orders-enriched
 
       kafka:
         streams:
+          bindings:
+            inventory-in-1:
+              consumer:
+                key-serde: com.study.kstream.model.ProductTypeSerde
+                value-serde: org.apache.kafka.common.serialization.Serdes$IntegerSerde
+                #TODO :Size of data received by IntegerDeserializer is not 4 String으로 서버상에 해석돼서 오류 일단은 천단위로 전송
           binder:
             application-id: hello-word-count-sample
             brokers: localhost:9092
@@ -36,7 +51,9 @@ spring:
               process.applicationId: processProcessor
               fraud.applicationId: fraudProcessor
               inventory.applicationId: InventoryProcessor
+              validationsAggregator.applicationId: validationsAggregatorProcessor
+              email.applicationId: emailProcessor
 
-logging:
-  level:
-    root: ERROR
+#logging:
+#  level:
+#    root: ERROR
