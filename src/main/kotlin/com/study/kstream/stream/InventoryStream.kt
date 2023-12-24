@@ -31,9 +31,11 @@ class InventoryStream {
                 .join(
                     warehouseInventory,
                     ::KeyValue,
-                    Joined.with(Topics.WAREHOUSE_INVENTORY.keySerde,
+                    Joined.with(
+                        Topics.WAREHOUSE_INVENTORY.keySerde,
                         Topics.ORDERS.valueSerde,
-                        Serdes.Integer())
+                        Serdes.Integer()
+                    )
                 )
                 .transform(::InventoryValidator, RESERVED_STOCK_STORE_NAME)
         }

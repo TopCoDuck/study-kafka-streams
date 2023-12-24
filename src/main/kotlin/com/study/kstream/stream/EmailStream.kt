@@ -27,15 +27,18 @@ class EmailStream(private val emailer: Emailer) {
     @Bean
     fun email(): Function<KStream<String, Order>, Function<KStream<String, Payment>, Function<GlobalKTable<Long, Customer>, KStream<String, OrderEnriched>>>> {
         return Function { orders: KStream<String, Order> ->
-                Function { payments: KStream<String, Payment> ->
-                    Function { customers: GlobalKTable<Long, Customer> ->
+            Function { payments: KStream<String, Payment> ->
+                Function { customers: GlobalKTable<Long, Customer> ->
                     val paymentsByOrderId = payments.selectKey { _, payment -> payment.orderId }
 
                     orders.join(
-                        paymentsByOrderId, ::EmailTuple, JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofMinutes(1)), joinedOrder
+                        paymentsByOrderId,
+                        ::EmailTuple,
+                        JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofMinutes(1)),
+                        joinedOrder
                     ).join(
-                            customers, { _, tuple -> tuple.order.customerId }, EmailTuple::setCustomer
-                        ).peek { _, emailTuple -> emailer.sendEmail(emailTuple) }
+                        customers, { _, tuple -> tuple.order.customerId }, EmailTuple::setCustomer
+                    ).peek { _, emailTuple -> emailer.sendEmail(emailTuple) }
 
                     orders.join(customers,
                         { _, order -> order.customerId },

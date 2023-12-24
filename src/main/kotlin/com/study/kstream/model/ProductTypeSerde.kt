@@ -18,5 +18,5 @@ class ProductTypeSerde : Serde<Product> {
 
 
     override fun deserializer() =
-        Deserializer<Product> { topic, bytes -> Product.valueOf(String(bytes))}
+        Deserializer<Product> { topic, bytes -> Product.valueOf(String(bytes)) }
 }

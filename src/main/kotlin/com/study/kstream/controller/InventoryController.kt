@@ -19,7 +19,7 @@ class InventoryController(private val kafkaTemplate: KafkaTemplate<String, Int>)
             KeyValue(Product.UNDERPANTS, quantityUnderpants),
             KeyValue(Product.JUMPERS, quantityJumpers)
         )
-        inventorys.forEach { inventory  ->
+        inventorys.forEach { inventory ->
             kafkaTemplate.send(Topics.WAREHOUSE_INVENTORY.name, inventory.key.toString(), inventory.value)
         }
 

@@ -4,7 +4,6 @@ package com.study.kstream.stream
 import com.study.kstream.model.Order
 import com.study.kstream.model.OrderState
 import com.study.kstream.model.OrderValidation
-import com.study.kstream.model.OrderValidationResult.FAIL
 import com.study.kstream.model.OrderValidationResult.PASS
 import com.study.kstream.model.Topics.ORDERS
 import com.study.kstream.model.Topics.ORDER_VALIDATIONS
@@ -33,26 +32,29 @@ class ValidationsAggregatorStream {
 
     private val orderGrouped: Grouped<String, Order> = Grouped
         .with(ORDERS.keySerde, ORDERS.valueSerde)
+
     @Bean
     fun validationsAggregator(): BiFunction<KStream<String, OrderValidation>, KStream<String, Order>, KStream<String, Order>> {
         return BiFunction<KStream<String, OrderValidation>, KStream<String, Order>, KStream<String, Order>> { validations, orders ->
-           val aggregate =  validations.groupByKey(validationGrouped)
+            val aggregate = validations.groupByKey(validationGrouped)
                 .windowedBy(SessionWindows.ofInactivityGapWithNoGrace(Duration.ofMinutes(5)))
                 .aggregate(
-                    {0L},
-                    { _, result, total -> if (PASS == result.validationResult) total + 1  else total },
+                    { 0L },
+                    { _, result, total -> if (PASS == result.validationResult) total + 1 else total },
                     { _, a, b -> b ?: a },
                     Materialized.with(null, Serdes.Long())
                 )
 
             val validatedOrder = aggregate
-                .toStream { windowedKey, _ ->  windowedKey.key() }
-                .filter { _, v -> v != null}
-                .filter { _, total -> total >= NUMBER_OR_RULES}
-                .join(orders.filter {  _, order -> OrderState.CREATED == order.state },
-                    { _, order -> order.copy(state = OrderState.VALIDATED)},
+                .toStream { windowedKey, _ -> windowedKey.key() }
+                .filter { _, v -> v != null }
+                .filter { _, total -> total >= NUMBER_OR_RULES }
+                .join(
+                    orders.filter { _, order -> OrderState.CREATED == order.state },
+                    { _, order -> order.copy(state = OrderState.VALIDATED) },
                     JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofMinutes(5)),
-                    joinOrders)
+                    joinOrders
+                )
 //            TODO: Invalid topology: stream-thread 오류
 //            val failOrder = validations.filter {_, rule -> FAIL == rule.validationResult}
 //                .join(orders,

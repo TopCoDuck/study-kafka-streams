@@ -3,10 +3,8 @@ package com.study.kstream.controller
 import com.study.kstream.model.OrderBean
 import com.study.kstream.model.Topics
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.support.SendResult
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.concurrent.CompletableFuture
 
 
 @RestController
